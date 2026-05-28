@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+
 import { AdminService } from './admin.service';
 import { VerifiedAddress } from './entities/verified-address.entity';
 import { ListVerifiedAddressesQueryDto } from './dto/list-verified-addresses-query.dto';
@@ -55,6 +56,7 @@ describe('AdminService (Verified Addresses)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminService,
+
         {
           provide: getRepositoryToken(VerifiedAddress),
           useValue: verifiedAddressRepo,
@@ -65,6 +67,7 @@ describe('AdminService (Verified Addresses)', () => {
           ),
           useValue: { findOne: jest.fn(), createQueryBuilder: jest.fn() },
         },
+
         {
           provide: getRepositoryToken(
             require('../markets/entities/market.entity').Market,
@@ -77,6 +80,7 @@ describe('AdminService (Verified Addresses)', () => {
           ),
           useValue: { findOne: jest.fn() },
         },
+
         {
           provide: getRepositoryToken(
             require('../predictions/entities/prediction.entity').Prediction,
@@ -89,6 +93,7 @@ describe('AdminService (Verified Addresses)', () => {
           ),
           useValue: { findOne: jest.fn() },
         },
+
         {
           provide: getRepositoryToken(
             require('../competitions/entities/competition-participant.entity')
@@ -117,6 +122,7 @@ describe('AdminService (Verified Addresses)', () => {
             .NotificationsService,
           useValue: { create: jest.fn() },
         },
+
         {
           provide: require('../soroban/soroban.service').SorobanService,
           useValue: {

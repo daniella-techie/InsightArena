@@ -7,8 +7,10 @@ import { AnalyticsModule } from '../analytics/analytics.module';
 import { CompetitionParticipant } from '../competitions/entities/competition-participant.entity';
 import { Competition } from '../competitions/entities/competition.entity';
 import { FlagsModule } from '../flags/flags.module';
+import { FeeHistory } from '../indexer/entities/fee-history.entity';
 import { Comment } from '../markets/entities/comment.entity';
 import { Market } from '../markets/entities/market.entity';
+import { CreatorEvent } from '../matches/entities/creator-event.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { Prediction } from '../predictions/entities/prediction.entity';
 import { User } from '../users/entities/user.entity';
@@ -27,7 +29,7 @@ import { AdminService } from './admin.service';
       CompetitionParticipant,
       ActivityLog,
       Flag,
-      VerifiedAddress,
+
     ]),
     AnalyticsModule,
     FlagsModule,

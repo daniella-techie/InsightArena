@@ -19,8 +19,10 @@ import { CompetitionsModule } from './competitions/competitions.module';
 import { validate } from './config/env.validation';
 import { FlagsModule } from './flags/flags.module';
 import { HealthModule } from './health/health.module';
+import { IndexerModule } from './indexer/indexer.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { MarketsModule } from './markets/markets.module';
+import { MatchesModule } from './matches/matches.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PredictionsModule } from './predictions/predictions.module';
 import { SearchModule } from './search/search.module';
@@ -86,6 +88,8 @@ import { DisputesModule } from './disputes/disputes.module';
     CommonModule,
     FlagsModule,
     DisputesModule,
+    MatchesModule,
+    IndexerModule,
   ],
 
   controllers: [AppController],

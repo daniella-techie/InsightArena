@@ -351,4 +351,21 @@ impl CreatorEventManagerContract {
             Err(_) => panic!("unexpected_error"),
         }
     }
+
+    /// Retrieve all predictions a user has made for a specific event.
+    ///
+    /// Returns a `Vec<Prediction>` sorted by `predicted_at` ascending
+    /// (earliest prediction first).  Returns an empty `Vec` when the user has
+    /// made no predictions for the event.
+    pub fn get_user_predictions(env: Env, user: Address, event_id: u64) -> Vec<Prediction> {
+        prediction::get_user_predictions(&env, user, event_id)
+    }
+
+    /// Calculate how many users predicted each outcome for a match.
+    ///
+    /// Returns `(team_a_count, team_b_count, draw_count)`.  All three counts
+    /// are always present; outcomes with no predictions return `0`.
+    pub fn get_prediction_distribution(env: Env, match_id: u64) -> (u32, u32, u32) {
+        prediction::get_prediction_distribution(&env, match_id)
+    }
 }

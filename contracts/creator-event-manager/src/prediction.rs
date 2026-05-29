@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env, Symbol};
+use soroban_sdk::{Address, Env, Symbol, Vec};
 
 use crate::admin;
 use crate::storage::{self};
@@ -185,4 +185,88 @@ pub fn submit_prediction(
 /// Fetch a prediction by ID and extend its TTL on read.
 pub fn get_prediction(env: &Env, prediction_id: u64) -> Result<Prediction, PredictionError> {
     storage::get_prediction(env, prediction_id).map_err(|_| PredictionError::PredictionNotFound)
+}
+
+/// Retrieve all predictions a user has made for a specific event, sorted by
+/// `predicted_at` timestamp in ascending order (earliest first).
+///
+/// Returns an empty `Vec` when the user has made no predictions for the event.
+/// Predictions from other events are never included.
+///
+/// # Sorting behaviour
+/// The returned `Vec` is sorted by `predicted_at` ascending.  Because
+/// predictions are appended in submission order and each ledger timestamp is
+/// monotonically non-decreasing, the list is almost always already sorted;
+/// the explicit sort guarantees correctness even if two predictions share the
+/// same timestamp.
+pub fn get_user_predictions(
+    env: &Env,
+    user: Address,
+    event_id: u64,
+) -> Vec<Prediction> {
+    let prediction_ids = storage::get_user_predictions(env, &user, event_id);
+
+    let mut predictions: Vec<Prediction> = Vec::new(env);
+    for prediction_id in prediction_ids.iter() {
+        if let Ok(prediction) = storage::get_prediction(env, prediction_id) {
+            predictions.push_back(prediction);
+        }
+    }
+
+    // Sort by predicted_at ascending (insertion-sort — list is typically small
+    // and already nearly sorted, so O(n²) worst-case is acceptable here).
+    let len = predictions.len();
+    for i in 1..len {
+        let mut j = i;
+        while j > 0 {
+            let prev = predictions.get(j - 1).unwrap();
+            let curr = predictions.get(j).unwrap();
+            if prev.predicted_at > curr.predicted_at {
+                predictions.set(j - 1, curr);
+                predictions.set(j, prev);
+                j -= 1;
+            } else {
+                break;
+            }
+        }
+    }
+
+    predictions
+}
+
+/// Calculate how many users predicted each outcome for a match.
+///
+/// Returns a tuple `(team_a_count, team_b_count, draw_count)` where each
+/// element is the number of predictions for that outcome.  All three counts
+/// are always present; outcomes with no predictions return `0`.
+///
+/// # Return format
+/// `(team_a_count: u32, team_b_count: u32, draw_count: u32)`
+pub fn get_prediction_distribution(
+    env: &Env,
+    match_id: u64,
+) -> (u32, u32, u32) {
+    let prediction_ids = storage::get_match_predictions(env, match_id);
+
+    let team_a_sym = Symbol::new(env, crate::storage_types::OUTCOME_TEAM_A);
+    let team_b_sym = Symbol::new(env, crate::storage_types::OUTCOME_TEAM_B);
+    let draw_sym = Symbol::new(env, crate::storage_types::OUTCOME_DRAW);
+
+    let mut team_a_count: u32 = 0;
+    let mut team_b_count: u32 = 0;
+    let mut draw_count: u32 = 0;
+
+    for prediction_id in prediction_ids.iter() {
+        if let Ok(prediction) = storage::get_prediction(env, prediction_id) {
+            if prediction.predicted_outcome == team_a_sym {
+                team_a_count += 1;
+            } else if prediction.predicted_outcome == team_b_sym {
+                team_b_count += 1;
+            } else if prediction.predicted_outcome == draw_sym {
+                draw_count += 1;
+            }
+        }
+    }
+
+    (team_a_count, team_b_count, draw_count)
 }
